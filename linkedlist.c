@@ -25,7 +25,7 @@ node_t *create_node(void *word, node_t *next) {
   return new_node;
 }
 
-void append_node(node_t **head, void *word)
+int append_node(node_t **head, void *word)
 {
   node_t *new_node = create_node(word, NULL);
   if (*head == NULL) {
@@ -35,29 +35,27 @@ void append_node(node_t **head, void *word)
 
     //Compare the first word to 'word' to avoid duplicates
     if(strncmp(temp->word, word, max(strlen(temp->word),strlen(word))) == 0){
-      return;
+      return -1;
     }
 
     while (temp->next != NULL) {
       // Avoid adding duplicates
       if(strncmp(temp->next->word, word, max(strlen(temp->next->word),strlen(word))) == 0){
-        return;
+        return -1;
       }
       temp = temp->next;
     }
 
     //If next was NULL the first time, we need to check temp and word to see if they match (again, to avoid duplicates)
     if(strncmp(temp->word, word, max(strlen(temp->word), strlen(word))) == 0){
-      return;
+      return -1;
     }
     temp->next = new_node;
   }
+  return 0;
 }
 
-/**
-Returns the length of the linked list.
-*/
-int listLength(node_t **head) {
+int list_length(node_t **head) {
   if(*head == NULL){
     return 0;
   }
@@ -70,13 +68,9 @@ int listLength(node_t **head) {
   return length;
 }
 
-/**
-Returns the node at the given index in the list.
-Will return NULL if index is out of bounds.
-*/
-node_t *nodeAtIndex(node_t **head, int index)
+node_t *node_at_index(node_t **head, int index)
 {
-  if (index > listLength(head) || index < 0){
+  if (index > list_length(head) || index < 0){
     return NULL;
   }
 
@@ -93,11 +87,7 @@ node_t *nodeAtIndex(node_t **head, int index)
   return NULL;
 }
 
-/**
-Index of given node_t in list.
-Returns a negative value if the node_t is not in the list.
-*/
-int indexOfnode(node_t **head, node_t *node)
+int index_of_node(node_t **head, node_t *node)
 {
   int counter = 0;
   node_t *temp = *head;
@@ -116,7 +106,7 @@ int indexOfnode(node_t **head, node_t *node)
 /**
 Swaps the position of node_t with the next item in the list.
 */
-void swapWithNext(node_t **head, node_t *nodeToSwap)
+void swap_with_next(node_t **head, node_t *nodeToSwap)
 {
   //We are switching from node_1, nodeToSwap, node_next, node_4
   //To                    node_1, node_next, nodeToSwap, node_4
@@ -124,7 +114,7 @@ void swapWithNext(node_t **head, node_t *nodeToSwap)
   node_t *nodeNext = nodeToSwap->next;
   if (nodeToSwap == NULL || nodeNext == NULL){ return; }
 
-  node_t *node1 = nodeAtIndex(head, indexOfnode(head, nodeToSwap) - 1);
+  node_t *node1 = node_at_index(head, index_of_node(head, nodeToSwap) - 1);
   node_t *node4 = nodeNext->next;
   nodeNext->next = nodeToSwap;
   nodeToSwap->next = node4;
@@ -140,7 +130,7 @@ void bubbleSort_file()
 {
 int swapped = 0; //boolean
 int index = 0;
-int length = listLength();
+int length = list_length();
 while(index < length - 1){
 swapped = 0;
 int jIndex = 0;
@@ -149,7 +139,7 @@ node_t *current = node_tAtIndex(jIndex);
 int minLength = min(strlen(current->file), strlen(current->next->file));
 int result = strncmp(current->file, current->next->file, minLength);
 if(result > 0){
-swapWithNext(current);
+swap_with_next(current);
 swapped = 1;
 }
 jIndex++;
@@ -162,21 +152,21 @@ index++;
 }
 */
 
-void bubbleSort_word(node_t **head) {
+void bubble_sort(node_t **head) {
   int swapped = 0; //boolean
   int index = 0;
 
-  // printf("listLength(head): %i\n", listLength(head));
-  int length = listLength(head);
+  // printf("list_length(head): %i\n", list_length(head));
+  int length = list_length(head);
   while(index < length - 1){
     swapped = 0;
     int jIndex = 0;
     while(jIndex < length - 1){
-      node_t *current = nodeAtIndex(head, jIndex);
+      node_t *current = node_at_index(head, jIndex);
       int minLength = min(strlen(current->word), strlen(current->next->word));
       int result = strncmp(current->word, current->next->word, minLength);
       if(result > 0){
-        swapWithNext(head, current);
+        swap_with_next(head, current);
         swapped = 1;
       }
       jIndex++;
@@ -192,12 +182,11 @@ void bubbleSort_word(node_t **head) {
  * Returns a pointer to a node near the middle of the list,
  * after having truncated the original list before that point.
  */
-static node_t *bisectList(node_t *head)
+static node_t *bisect_list(node_t *head)
 {
     /* The fast pointer moves twice as fast as the slow pointer. */
     /* The prev pointer points to the node preceding the slow pointer. */
     node_t *fast = head, *slow = head, *prev = NULL;
-
     while (fast != NULL && fast->next != NULL)
     {
         fast = fast->next->next;
@@ -212,7 +201,7 @@ static node_t *bisectList(node_t *head)
     return slow;
 }
 
-node_t * mergeList(node_t *list1, node_t *list2)
+node_t * merge_list(node_t *list1, node_t *list2)
 {
     node_t dummy_head = { 0, NULL };
     node_t *tail = &dummy_head;
@@ -240,8 +229,8 @@ node_t *merge_sort_private(node_t **head)
         return list1;
     }
 
-    node_t *list2 = bisectList(list1);
-    return mergeList( merge_sort_private(&list1), merge_sort_private(&list2) );
+    node_t *list2 = bisect_list(list1);
+    return merge_list( merge_sort_private(&list1), merge_sort_private(&list2) );
 }
 
 void merge_sort(node_t **head)
@@ -249,7 +238,7 @@ void merge_sort(node_t **head)
   *head = merge_sort_private(head);
 }
 
-void printList(node_t **head)
+void print_list(node_t **head)
 {
   node_t *current = *head;
   while (current != NULL) {
@@ -258,11 +247,7 @@ void printList(node_t **head)
   }
 }
 
-/**
-Removes all nodes from the list and frees all memory/
-Returns a negative value if unsuccessful
-*/
-void removeAll(node_t **head)
+void remove_all(node_t **head)
 {
   node_t *current = *head;
   node_t *temp = NULL;
